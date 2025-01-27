@@ -100,6 +100,15 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     }
 }
 
+# Check if $PROFILE exists
+if (-not (Test-Path -Path $PROFILE)) {
+    # Create the $PROFILE file
+    New-Item -ItemType File -Path $PROFILE -Force
+    Write-Output "Profile created at $PROFILE"
+} else {
+    Write-Output "Profile already exists at $PROFILE"
+}
+
 # Install the latest PowerShell
 Write-Output "Installing the latest PowerShell..."
 try {
