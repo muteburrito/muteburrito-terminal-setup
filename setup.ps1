@@ -150,14 +150,14 @@ $applications = @(
     "Microsoft.WindowsTerminal",
     "Git.Git",
     "Valve.Steam",
-    "Ubisoft.UbisoftConnect",
+    "Ubisoft.Connect",
     "EpicGames.EpicGamesLauncher",
     "Postman.Postman",
     "Docker.DockerDesktop",
     "Discord.Discord",
     "Google.Chrome",
     "GitHub.GitHubDesktop",
-    "Python.Python.3"
+    "Python.Python.3.12"
 )
 
 # Install applications non-interactively
