@@ -1,12 +1,10 @@
 # ASCII Logo
 $logo = @"
-___  ___      _      ______                 _ _        _       _____                   _             _   _____      _               
-|  \/  |     | |     | ___ \               (_) |      ( )     |_   _|                 (_)           | | /  ___|    | |              
-| .  . |_   _| |_ ___| |_/ /_   _ _ __ _ __ _| |_ ___ |/ ___    | | ___ _ __ _ __ ___  _ _ __   __ _| | \ `--.  ___| |_ _   _ _ __  
-| |\/| | | | | __/ _ \ ___ \ | | | '__| '__| | __/ _ \  / __|   | |/ _ \ '__| '_ ` _ \| | '_ \ / _` | |  `--. \/ _ \ __| | | | '_ \ 
-| |  | | |_| | ||  __/ |_/ / |_| | |  | |  | | || (_) | \__ \   | |  __/ |  | | | | | | | | | | (_| | | /\__/ /  __/ |_| |_| | |_) |
-\_|  |_/\__,_|\__\___\____/ \__,_|_|  |_|  |_|\__\___/  |___/   \_/\___|_|  |_| |_| |_|_|_| |_|\__,_|_| \____/ \___|\__|\__,_| .__/ 
-                                                                                                                             | |                                                                                                                              |_|                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+#####################################################################
+
+MUTEBURRITO'S TERMINAL SETUP SCRIPT
+
+#####################################################################                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 "@
 Write-Output $logo
 Write-Output "Welcome to the MuteBurrito Setup Script!"
@@ -41,10 +39,9 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 # Function to test if virtualization is enabled
 function Test-Virtualization {
-    $svm = (Get-CimInstance -ClassName Win32_Processor).VirtualizationFirmwareEnabled
-    $slm = (Get-CimInstance -ClassName Win32_Processor).VMMonitorModeExtensions
+    $svm = Get-WmiObject Win32_ComputerSystem | Select-Object HypervisorPresent
 
-    if ($svm -and $slm) {
+    if ($svm.HypervisorPresent) {
         Write-Output "Virtualization is enabled."
         return $true
     } else {
@@ -110,6 +107,77 @@ try {
     Write-Output "Latest PowerShell installed successfully."
 } catch {
     Write-Error "Failed to install the latest PowerShell. Error: $_"
+}
+
+# Install oh-my-posh using winget
+Write-Output "Installing oh-my-posh using winget..."
+try {
+    winget install --id JanDeDobbeleer.OhMyPosh --exact --source winget --silent --accept-source-agreements --accept-package-agreements
+    Write-Output "oh-my-posh installed successfully via winget."
+} catch {
+    Write-Error "Failed to install oh-my-posh via winget. Error: $_"
+    exit
+}
+
+# Reload the profile
+. $PROFILE
+
+# Install Nerd Fonts FiraCode
+Write-Output "Installing FiraCode Nerd Font using oh-my-posh..."
+try {
+    oh-my-posh font install FiraCode Nerd Font
+    Write-Output "FiraCode Nerd Font installed successfully."
+} catch {
+    Write-Error "Failed to install FiraCode Nerd Font. Error: $_"
+    exit
+}
+
+# Install additional PowerShell modules
+Write-Output "Installing additional PowerShell modules..."
+Install-Module -Name Terminal-Icons -Scope CurrentUser -Force
+Install-Module -Name posh-git -Scope CurrentUser -Force
+Write-Output "Additional PowerShell modules installed successfully."
+
+# Import the modules to verify installation
+Write-Output "Importing PowerShell modules..."
+Import-Module Terminal-Icons -ErrorAction Stop
+Import-Module posh-git -ErrorAction Stop
+Write-Output "PowerShell modules imported successfully."
+
+# Define applications to install
+$applications = @(
+    "Microsoft.VisualStudioCode",
+    "Microsoft.WindowsTerminal",
+    "Git.Git",
+    "Valve.Steam",
+    "Ubisoft.UbisoftConnect",
+    "EpicGames.EpicGamesLauncher",
+    "Postman.Postman",
+    "Docker.DockerDesktop",
+    "Discord.Discord",
+    "Google.Chrome",
+    "GitHub.GitHubDesktop",
+    "Python.Python.3"
+)
+
+# Install applications non-interactively
+foreach ($app in $applications) {
+    Write-Output "Installing $app..."
+    try {
+        winget install --id $app -e --source winget --silent --accept-source-agreements --accept-package-agreements
+        Write-Output "$app installed successfully."
+    } catch {
+        Write-Error "Failed to install $app. Error: $_"
+    }
+}
+
+# Upgrade all winget packages
+Write-Output "Upgrading all winget packages..."
+try {
+    winget upgrade --all --silent --accept-source-agreements --accept-package-agreements
+    Write-Output "All packages upgraded successfully."
+} catch {
+    Write-Error "Failed to upgrade some packages. Error: $_"
 }
 
 # Update Windows Terminal settings
@@ -234,89 +302,10 @@ $settingsJson = @"
 Set-Content -Path $settingsPath -Value $settingsJson -Encoding UTF8
 Write-Output "Windows Terminal settings updated successfully."
 
-# Install oh-my-posh using winget
-Write-Output "Installing oh-my-posh using winget..."
-try {
-    winget install --id JanDeDobbeleer.OhMyPosh --exact --source winget --silent --accept-source-agreements --accept-package-agreements
-    Write-Output "oh-my-posh installed successfully via winget."
-} catch {
-    Write-Error "Failed to install oh-my-posh via winget. Error: $_"
-    exit
-}
-
-# Reload the profile
-. $PROFILE
-
-# Install Nerd Fonts FiraCode
-Write-Output "Installing FiraCode Nerd Font using oh-my-posh..."
-try {
-    oh-my-posh font install FiraCode Nerd Font
-    Write-Output "FiraCode Nerd Font installed successfully."
-} catch {
-    Write-Error "Failed to install FiraCode Nerd Font. Error: $_"
-    exit
-}
-
-# Install additional PowerShell modules
-Write-Output "Installing additional PowerShell modules..."
-winget install --id Terminal-Icons --exact --source winget --silent --accept-source-agreements --accept-package-agreements
-winget install --id posh-git --exact --source winget --silent --accept-source-agreements --accept-package-agreements
-Write-Output "Additional PowerShell modules installed successfully."
-
-# Import the modules to verify installation
-Write-Output "Importing PowerShell modules..."
-Import-Module oh-my-posh -ErrorAction Stop
-Import-Module Terminal-Icons -ErrorAction Stop
-Import-Module posh-git -ErrorAction Stop
-Write-Output "PowerShell modules imported successfully."
-
-# Define applications to install
-$applications = @(
-    "Microsoft.VisualStudioCode",
-    "Microsoft.WindowsTerminal",
-    "Git.Git",
-    "Valve.Steam",
-    "Ubisoft.UbisoftConnect",
-    "EpicGames.EpicGamesLauncher",
-    "Postman.Postman",
-    "Docker.DockerDesktop",
-    "Discord.Discord",
-    "Google.Chrome",
-    "GitHub.GitHubDesktop",
-    "Python.Python.3"
-)
-
-# Check if applications are already installed before attempting installation
-foreach ($app in $applications) {
-    $installApp = Read-Host "Do you want to install $app? (y/n)"
-    if ($installApp -eq 'y') {
-        if (-not (Get-Command $app -ErrorAction SilentlyContinue)) {
-            Write-Output "Installing $app..."
-            try {
-                winget install --id $app -e --source winget --silent --accept-source-agreements --accept-package-agreements
-                Write-Output "$app installed successfully."
-            } catch {
-                Write-Error "Failed to install $app. Error: $_"
-            }
-        } else {
-            Write-Output "$app is already installed."
-        }
-    } else {
-        Write-Output "Skipping installation of $app."
-    }
-}
-
-# Upgrade all winget packages
-$upgradePackages = Read-Host "Do you want to upgrade all winget packages? (y/n)"
-if ($upgradePackages -eq 'y') {
-    Write-Output "Upgrading all winget packages..."
-    try {
-        winget upgrade --all --silent --accept-source-agreements --accept-package-agreements
-        Write-Output "All packages upgraded successfully."
-    } catch {
-        Write-Error "Failed to upgrade some packages. Error: $_"
-    }
-}
+# Restart terminal to apply changes
+Write-Output "Restarting terminal to apply changes..."
+Start-Process "powershell.exe" -ArgumentList "-NoExit", "-Command", "exit"
+exit
 
 # Final message
 Write-Output "Setup completed successfully!"
